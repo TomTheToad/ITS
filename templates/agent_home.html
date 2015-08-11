@@ -1,0 +1,40 @@
+<script>
+	$(function(){
+		$(".element").typed({
+			strings: ["Welcome to Interstellar Travel Services<br>The best Interstellar Agency support in the galaxy!<br>Servicing all your client's vacation wants and needs.<br><br><div class='element_smallPrint'>All rights reserved<br>Unusually massive fees will certainly apply</div>"],
+			// typing speed
+			typeSpeed: 50,
+			// time before typing starts
+			startDelay: 1000,
+			// backspacing speed
+			backSpeed: 0,
+			// time before backspacing
+			backDelay: 500,
+			// loop
+			loop: false,
+			// false = infinite
+			loopCount: false,
+			// show cursor
+			showCursor: true,
+			// character for cursor
+			cursorChar: "|",
+			// attribute to type (null == text)
+			attr: null,
+			// either html or text
+			contentType: 'html',
+			// call when done callback function
+			callback: function() {},
+			// starting callback function before each string
+			preStringTyped: function() {},
+			//callback for every typed string
+			onStringTyped: function() {},
+			// callback for reset
+			resetCallback: function() {}
+		});
+	});
+</script>
+<div class="element_container">
+    <h1>Agent Home Page</h1>
+    <div class="element"></div>
+    <div class="star_container">{{ stars }}</div>
+</div>

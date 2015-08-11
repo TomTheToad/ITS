@@ -1,0 +1,55 @@
+<html>
+<head>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    
+<script src="../static/typed.js"></script>
+
+<!-- typed effect from http://www.mattboldt.com/demos/typed-js/ -->
+<!-- because all the cool kids are doing it.....  -->
+</head>
+<body>
+        <!-- Status info -->
+        <div class="info">
+            page = {{ page }}<br>
+            status = {{ status }}<br>
+            email = {{ email }}<br>
+            password = {{ password }}<br>
+            logged in = {{ logged_in }}
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav_container">
+            <a href="#content" title="skip to content" class="hidden">Skip to content</a>
+            <div class="navigation text">
+                {% if status == 'submitted' %}
+                    <ul role="navigation">
+                        <li><a href="{{ url_for('agent_home') }}" title="home page">home</a></li>
+                        <li><a href="#" title="create a new trip">create trip</a></li>
+                        <li><a href="#" title="work with clients">clients</a></li>
+                    </ul>
+                {% else %}
+                     <form class="form input" roll="login" action="{{ url_for('agent_home', login=true, email=email, password=password) }}" method="post">
+                        <label>Login Required</label>
+                        <input type='text' name='email' placeholder='Email'>
+                        <input type='text' name='password' placeholder='Password'>
+                        <input type='submit' value='login'>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    
+        <!-- Content -->
+        <div role="main" id="content">
+            <div class="logo_container">
+                <img src="../static/images/ITS_logo.gif" class="bg_logo" width="400" height="426" alt="Interstellar Travel Services">
+            </div>
+            <div class="mainBody">
+                <div class="content_container">
+                    {% extends(page) %}
+                </div>
+            </div>
+        </div>
+    
+    </body>
+</html>

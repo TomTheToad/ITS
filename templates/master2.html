@@ -1,0 +1,47 @@
+<html>
+<head>
+    <link rel=stylesheet type=text/css href="../static/style2.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="../static/typed.js"></script>
+    <script src="../static/ITS_script.js"></script>
+</head>
+<body>
+    <div class="flash_container">
+    <!-- MESSAGE FLASHING -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+    {% for message in messages %}
+      <li><span class="message_flashing">{{message}}</span></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    </div>
+    
+    <!-- Navigation -->
+    <div class="navigation_container">
+        {% if navigation != False %}
+            <div class='navigation'>
+                <a href="#content" title="skip to content" class="hidden">Skip to content</a>
+                <ul role="navigation">
+                        <li><a href="{{ url_for('agent_home') }}" title="home page">home</a></li>
+                        <li><a href="{{ url_for('clients') }}" title="work with clients">clients</a></li>
+                        <li><a href="{{ url_for('agent_choose_test') }}" title="Test your skills!">Testing</a></li>
+                        <li><a href="{{ url_for('gdisconnect') }}" title="logout">logout</a></li>
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Content Area -->
+    <div class="content">
+        <span class="blue_box">
+
+            <!-- Content -->
+            {% extends(page) %}
+        
+        </span>
+    </div>
+</body>
+</html>

@@ -1,0 +1,298 @@
+/* Master Template */
+body {
+    background-color: black;
+    background: url(../static/images/space2.jpg);
+    min-width: 600px;
+}
+
+.content {
+    width: 100%;
+    background: url(images/ITS_logo3.gif);
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.blue_box {
+    display: block;
+    background: rgba(80,182,239, 0.3);
+    border: 2px solid;
+    border-color: rgba(80,182,239, 0.5);
+    border-radius: 10px;
+    width: 90%;
+    min-width: 618px;
+    min-height: 500px;
+    padding: 50px;
+    margin: 0 auto;
+}
+
+.g_button {
+    text-align: center;
+}
+
+.flash_container {
+    background-color: rgba(80,182,239,0.2);
+    position: fixed;
+    width: 100%;
+    height: 30px;
+    float: left;
+    left: 0px;
+    top: 0px;
+    border-bottom: 4px solid;
+    border-bottom-color: rgba(80,182,239, 0.5);
+}
+
+.message_flashing {
+    position: fixed;
+    float: left;
+    top: 5px;
+    left: 5px;
+    font-family: monospace;
+    font-size: 15px;
+    color: white;
+}
+
+.message_success {
+    display: block;
+    width: 100px;
+    white-space: nowrap;
+    font-family: monospace;
+    font-size: 15px;
+    color: white;
+    margin: 0 auto;
+}
+
+.navigation_container {
+    background-color: rgba(80,182,239,0.2);
+    position: fixed;
+    width: 100%;
+    height: 30px;
+    left: 0px;
+    bottom: 0px;
+    border-top: 4px solid;
+    border-color: rgba(80,182,239, 0.5);
+}
+
+.navigation {
+    bottom: 2px;
+}
+
+.navigation ul {
+    display: block;
+    width: 500px;
+    margin: 0 auto;
+    white-space: nowrap;
+    list-style-type: none;
+}
+
+.navigation li {
+    display: inline;
+    padding: 20px;
+}
+
+.navigation a {
+    font-family: monospace;
+    font-size: 20px;
+    color: white;
+    letter-spacing: normal;
+    transition: all 1s;
+    text-decoration: none;
+} 
+
+.navigation a:hover {
+    color: lime;
+    letter-spacing: 1px;
+    transition: all 2s;
+}
+
+h1 {
+    display: block;
+    font-family: monospace;
+    color: white;
+    font-size: 2em;
+    font-stretch: expanded;
+    text-align: center;
+}
+
+h3 {
+    display: block;
+    font-family: serif;
+    color: white;
+    font-size: 1em;
+    text-align: left;
+    margin: 4px;
+}
+
+p {
+    display: block;
+    font-family: serif;
+    color: white;
+    font-size: 1em;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+    line-height: 0;
+    font-size: 0;
+    color: transparent;
+}
+
+/* Agent Home */
+.element_container {
+    width: 100%;
+    height: 400px;
+    border-radius: 10px;
+    background: rgba(0,0,0, 0.5);
+}
+
+.element {
+    width: 100%;
+    font-size: 20px;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+}
+
+.element_smallPrint {
+    font-size: 12px;
+}
+
+.typed-cursor{
+    opacity: 1;
+    -webkit-animation: blink 0.7s infinite;
+    -moz-animation: blink 0.7s infinite;
+    animation: blink 0.7s infinite;
+}
+@keyframes blink{
+    0% { opacity:1; }
+    50% { opacity:0; }
+    100% { opacity:1; }
+}
+@-webkit-keyframes blink{
+    0% { opacity:1; }
+    50% { opacity:0; }
+    100% { opacity:1; }
+}
+@-moz-keyframes blink{
+    0% { opacity:1; }
+    50% { opacity:0; }
+    100% { opacity:1; }
+}
+
+/* Clients */
+.client_divider {
+    display: block;
+    margin: 20px;
+    background: rgba(0,0,0, 0.5);
+    border: solid black;
+    border-bottom-width: 2px;
+    border-radius: 10px;
+    padding: 10px;
+}
+.client_list {
+    font-family: monospace;
+    font-size: 1em;
+    color: white;
+}
+
+.client_info {
+    display: block;
+    white-space: nowrap;
+}
+
+.client_image {
+    float: right;
+}
+
+.client_buttons {
+
+}
+
+.client_disabled {
+    background-color: lightgray;
+}
+
+/* Create Trip */
+.trip_divider {
+    display: block;
+    margin: 20px;
+    background: rgba(0,0,0, 0.5);
+    border: solid black;
+    border-bottom-width: 2px;
+    border-radius: 10px;
+    padding: 10px;
+    
+}
+
+.trip_who {
+    display: block;
+}
+
+.passenger_info {
+    display: block;
+    width: 75%;
+    height: 100;
+    color: lime;
+    margin: 0 auto;
+    padding: 3px;
+    background-color: rgba(0,0,0, 0.7);
+}
+
+.select {
+    display: block;
+    font-family: monospace;
+    width: 400px;
+    white-space: nowrap;
+    margin: 0 auto;
+}
+
+.selected {
+    font-family: monospace;
+    size: 12px;
+    color: red;
+    
+}
+
+.trip_submit {
+    display: block;
+    width: 50px;
+    margin: 0 auto;
+}
+
+/* Agent Choose Test */
+
+.test_clients {
+    display: block;
+    width: 600px;
+    font-size: 1em;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.float_image {
+    display: inline-block;
+    margin-right: 10px;
+    float: left;
+}
+
+/* Results */
+.results_container {
+    width: 100%;
+    height: 400px;
+    background: rgba(0,0,0, 0.5);
+    border-radius: 10px;
+    vertical-align: middle;
+}
+
+.results_message {
+    display: block;
+    width: 80%;
+    font-size: 20px;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+    padding: 50px;
+    margin: 0 auto;
+}

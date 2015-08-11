@@ -1,0 +1,55 @@
+<form class="agent_testing" id="agent_testing" name="agent_testing" action="{{ url_for('test_results', client_id=client_id) }}" method="POST">
+    <input type="hidden" id="client_id" name="client_id" value="{{ client_id }}">
+    
+    <!-- Who -->
+    <div class="trip_divider">
+        <div class="trip_who">
+            <h3>{{ name }}</h3>
+            <img src="{{ client_image }}" width="100" height="100" alt="Client Image">
+        </div>
+        <div class="passenger_info">
+        <h3>{{ notes }}</h3>
+        </div>
+    </div>
+    
+    <!-- Where -->
+    <div class="trip_divider">
+        <div class="select">
+            <input type="hidden" id="trip_where" name="trip_where" value="not_selected">
+            <input type="button" name="jupiter" value="Deep Space9" onClick="setWhere(where='1', name='Deep Space9')" {{ choice_where }}>
+            <input type="button" name="saturn" value="Zentari Moons" onClick="setWhere(where='2', name='Deep Zentari Moons')" {{ choice_where }}>
+            <input type="button" name="venus" value="Plava Laguna" onClick="setWhere(where='3', name='Plava Laguna')" {{ choice_where }}>
+        </div>
+        <div class="selected" id="destination" name=destination value="None">Destination: not selected</div>
+    </div>
+    
+    <!-- How -->
+    <div class="trip_divider">
+        <div class="select">
+            <input type="hidden" id="trip_how" name="trip_how" value="not_selected">
+            <input type="button" name="cruise" value="cruise" onClick="setHow(how='1', name='cruise')" {{ choice_how }}>
+            <input type="button" name="flight" value="flight" onClick="setHow(how='2', name='flight')" {{ choice_how }}>
+            <input type="button" name="shipping_container" value="shipping_container" onClick="setHow('3', name='shipping container')" {{ choice_how }}>
+        </div>
+        <div class="selected" id="travel" value=None>Travel Method: not selected</div>
+    </div>
+    
+    <!-- Food -->
+    <div class="trip_divider">
+        <div class="select">
+            <input type="hidden" id="trip_food" name="trip_food" value="not_selected">
+            <input type="button" name="sushi" value="sushi dinner" onClick="setFood(food='1', name='sushi dinner')" {{ choice_food }}>
+            <input type="button" name="chicken" value="chicken dinner" onClick="setFood(food='2', name='chicken dinner')" {{ choice_food }}>
+            <input type="button" name="gelatinous_goo" value="gelatinous goo" onClick="setFood(food='3', name='gelatinous goo')" {{ choice_food }}>
+            <input type="button" name="third_class" value="third class passengers" onClick="setFood(food='4', name='third class')" {{ choice_food }}>
+        </div>
+        <div class="selected" id="food">Cuisine: not selected</div>
+    </div>
+    
+    <!-- Submit it -->
+    <div class="trip_divider">
+        <div class="trip_submit">
+            <input type="button" value="Book It!" onclick="checkTestForm()" {{ book_it }}>
+        </div>
+    </div>
+</form>

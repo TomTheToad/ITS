@@ -1,0 +1,53 @@
+<!-- client selection area -->
+<div class="client_divider">
+    <div class="client_list">
+        <form id="choose_client" action="#">
+            Select a current Client:
+            <select id="client_select" name="client_select" onchange="setClient()">
+                <option value="empty">clients..</option>
+                {{ choose_client|safe }}
+            </select>
+            or
+            <button type="button" name="add_button" onclick="newClient()">Add a New Client</button>
+            <!-- <input type="submit" name="load_client" value="Load Client"> -->
+        </form>
+    </div>
+</div>
+    
+<!-- client information and edit -->
+<div class="client_divider">
+    <div class="client_info">
+        <form id="edit_client" action="{{ url_for('clients') }}" method="post">
+            <input type="hidden" id="client_id" name="client_id", value="{{ client_id }}">
+            <input type="hidden" id="new_client" name="new_client" value="False">
+            <input type="hidden" id="current_species" name="current_species" value="{{ current_species }}">
+            <div class="client_details"></div>
+                <span class="client_image">
+                    <h3>
+                        <img src="{{ client_image }}" height=100px width=100px alt="client image"><br>
+                        <input type="file" name="image" disabled>
+                    </h3>
+                </span>
+                <h3>First Name: <input class="client_disabled" type="text" id="first_name" name="first_name" value="{{ first_name}}" disabled></h3>
+                <h3>Last Name: <input class="client_disabled" type="text" id="last_name" name="last_name" value="{{ last_name }}" disabled></h3>
+                <h3>Species: <select id="species_select" name="species_select" onchange="setCurrentSpecies()" disabled>
+                    <option selected="selected" name="selected_species" value="{{ selected_species_id }}">{{ selected_species_name }}</option>
+                    {{ choose_species|safe }}
+                    </select></h3><br>
+                <h3>Notes<br></h3>
+                <textarea class="client_disabled" id="notes" name="notes" rows="8" cols="50" value=" {{ notes }}" disabled>{{ notes }}</textarea><br>
+                <button type="button" name="edit_button" {{ edit_button }} onClick='editForm(newClient=false)'>Edit</button>
+                <button type="submit" name="save_button" disabled>Save Changes</button>
+                <button type="button" id="delete_button" name="delete_button" onClick="deleteClient()" disabled>Delete Client</button>
+    </div>
+</div>
+
+<!-- option create trip for client -->
+<div class="client_divider">
+    <div class="client_buttons">
+        <form action="#" method="post">
+                <input type="hidden" id="client_id" name="client_id", value="{{ client_id }}">
+            <button type="button" id="trip_button" name="trip_button" onclick="bookTravel()" {{ trip_button }}>Book Travel for This Client</button>
+        </form>
+    </div>
+</div>
