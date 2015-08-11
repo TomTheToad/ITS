@@ -52,9 +52,10 @@ testpass2 = TestPassengers(first_name='Eatya', last_name='Sausagemaker', species
                                  "Kerplowski) came for a visit. Her beloved recycling works was destroyed and "
                                  "many unfortunate events have ensued since. ", image="../static/images/robo2.gif")
 testpass3 = TestPassengers(first_name='Leroy', last_name='Jenkins', species_id=3,
-                           notes="Mr Kerplowsky is the most influential, successful, and wealthy door to door .net"
+                           notes="Mr Jenkins is the most influential, successful, and wealthy door to door .net"
                                  "salesman in all the known universe. He is our best and, unfortunately, clumsiest "
-                                 "clients. He is to be handled with extreme caution!",
+                                 "client. He is to be handled with extreme caution! He is also dubiously known for "
+                                 "running into situations with no concern for safety or planning.",
                            image="../static/images/weirdo.jpg")
 
 session.add(testpass1)
