@@ -10,7 +10,7 @@ vasselta@gmail.com
 What is it?
 ______________________________________________________________________________________________________
 
-Interstellar Travel Services, or ITS, is a Travel Agent software simular with an included simple game.
+Interstellar Travel Services, or ITS, is a Travel Agent software simulator with an included simple game.
 The player takes the roll of a galactic travel agent.
 
 The player can create view, create, delete, update, and "book travel" for their clients and some
