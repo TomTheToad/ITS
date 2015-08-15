@@ -29,10 +29,9 @@ ________________________________________________________________________________
 Requires 0.9 version of Flask.
 Requires 0.8.3 version of werkzeug
 
-Quick Setup:
+Quick Setup(if ITS.db exists already):
     In a command line window:
-        python ITS_db_setup.py
-        python ITS_db_populate.py
+
         python ITS_main.py
 
         open browser to: localhost:5000
