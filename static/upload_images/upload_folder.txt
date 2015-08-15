@@ -1,0 +1,3 @@
+This file exists so that git will allow an empty directory to be commited.
+
+This file should be located in the upload_images directory.
