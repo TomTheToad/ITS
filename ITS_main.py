@@ -17,7 +17,8 @@
 
 
 # Core Flask imports
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from werkzeug import secure_filename
 
 app = Flask(__name__)
 
@@ -37,11 +38,9 @@ import requests
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Import tables from ITS database setup
 from ITS_db_setup import Base, Passengers, Species, Agents, Destinations, TravelMethod, Menu, TestPassengers, \
     TestingStatus, Tests
-
-# import bleach to sanitize image queries
-import bleach
 
 # Create the database connection and engine
 engine = create_engine('sqlite:///ITS.db')
@@ -54,6 +53,43 @@ session = DBSession()
 # Stored Google+ local secrets file path
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
+
+# Begin Image handling functions
+# For custom images for clients
+
+# Setup a directory for file uploads for custom image handling
+UPLOAD_FOLDER = 'static/upload_images'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Set default image
+DEFAULT_IMAGE_LOCATION = '../static/images/eyes.gif'
+app.config['DEFAULT_IMAGE'] = DEFAULT_IMAGE_LOCATION
+
+# Accepted file types
+ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'gif', 'png'])
+
+
+# check to see if file is accepted file type
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+
+# Function that attempts to process and uploaded client image
+def upload_client_image(image):
+
+    try:
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image.save(image_path)
+            print "Message: Image upload successful"
+
+        return '../' + str(image_path)
+
+    except:
+        print "Warning: Image upload failed"
+
+        return app.config['DEFAULT_IMAGE']
 
 
 # Routes for index/ login area
@@ -69,7 +105,7 @@ def index():
     # Anti-forgery State Token generation.
     state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     login_session['state'] = state
-    return render_template('master2.html', STATE=state, page=user_location, navigation=False)
+    return render_template('master2.html', page=user_location, STATE=state, navigation=False)
 
 
 # Agent/ User landing page after successful login.
@@ -79,7 +115,7 @@ def agent_home():
     # Verify that user is logged in. If not redirect.
     # Repeated for all locations requiring authorization.
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
     else:
 
@@ -116,7 +152,7 @@ def agent_home():
 
         # Exception in the even that the above is incomplete.
         except:
-            print "Unable to access Testing Status for current agent."
+            print "WARNING: Unable to access Testing Status for current agent."
 
         # Page to render within master.
         user_location = 'agent_home.html'
@@ -132,15 +168,12 @@ def agent_home():
 def clients(client_id=None):
 
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
     else:
 
         # Page to render within master.
         user_location = 'clients.html'
-
-        # Default client image in the event that none is provided.
-        default_image = '../static/images/eyes.gif'
 
         # Populate selection drop down menu with all clients.
         # Including those of other agents.
@@ -169,7 +202,6 @@ def clients(client_id=None):
             # Check to see if client is new.
             # Add current Agent's own id for ownership purposes.
             if is_new_client == 'True':
-                print "New client route taken."
 
                 # Attempt to establish current logged in Agent_id
                 # Google+ does not always supply email leading to mssing email key.
@@ -193,27 +225,19 @@ def clients(client_id=None):
                 new_species_id = request.form['current_species']
                 new_notes = request.form['notes']
 
-                # try:
-                #     new_image = request.form['image']
-                # except:
-                #     print "Warning: No Image data from form"
+                # Attempt to load image data from files in form:
+                try:
+                    new_image = request.files['image']
+                except:
+                    print "Warning: No Image data from form"
 
-                # Call the default client image
-                uploaded_image = default_image
-
-                # Attempt call the upload function and
                 # update the image location.
-                # try:
-                #     if new_image is not None:
-                #         is_true = upload_client_image(new_image)
-                #         if is_true == True:
-                #             uploaded_image = new_image
-                # except:
-                #     print "Unable to add image"
+                if new_image is not None:
+                        image_path = upload_client_image(new_image)
 
                 # Add the new client to the Passenger table in the database
                 new_client = Passengers(first_name=new_first_name, last_name=new_last_name, species_id=new_species_id,
-                                        agent_id=new_agent_id, notes=new_notes, image=default_image)
+                                        agent_id=new_agent_id, notes=new_notes, image=image_path)
 
                 session.add(new_client)
                 session.commit()
@@ -223,12 +247,17 @@ def clients(client_id=None):
                 # Try to locate newly created client based off of first and last name for necessary id
                 try:
                     locate_new_client = session.query(Passengers).filter_by(last_name=new_last_name,
-                                                                        first_name=new_first_name).one()
-                    locate_id = locate_new_client.id
+                                                                            first_name=new_first_name).one()
+                    locate_new_client.id
 
                     # client_id establish so set on client's page
                     return render_template('master2.html', page=user_location, choose_client=client_drop_down,
-                                           choose_species=species_drop_down, client_id=locate_id)
+                                           choose_species=species_drop_down, client_id=locate_new_client.id,
+                                           first_name=locate_new_client.first_name,
+                                           last_name=locate_new_client.last_name,
+                                           species_id=locate_new_client.species_id,
+                                           notes=locate_new_client.notes,
+                                           client_image=locate_new_client.image)
 
                 # Did not locate necessary client_id. Redirect to agent_home so client page can reload properly.
                 except:
@@ -238,7 +267,6 @@ def clients(client_id=None):
 
             # Path for editing an existing client record.
             else:
-                print "Modified client route taken"
                 # retrieve form values
                 edit_client_id = request.form['client_id']
                 edit_first_name = request.form['first_name']
@@ -246,23 +274,15 @@ def clients(client_id=None):
                 edit_species_id = request.form['current_species']
                 edited_notes = request.form['notes']
 
-                # try:
-                #     edited_image = request.form['image']
-                # except:
-                #     print "Warning: No Image data from form"
+                # Attempt to load image data from files in form:
+                try:
+                    edited_image = request.files['image']
+                except:
+                    print "Warning: No Image data from form"
 
-                # Load the default client image
-                uploaded_image = default_image
-
-                # Attempt call the upload function and
                 # update the image location.
-                # try:
-                #     if edited_image is not None:
-                #         is_true = upload_client_image(edited_image)
-                #         if is_true is True:
-                #             uploaded_image = edited_image
-                # except:
-                #     print "Unable to add image."
+                if edited_image is not None:
+                        image_path = upload_client_image(edited_image)
 
                 client_to_edit = session.query(Passengers).filter_by(id=edit_client_id).one()
                 if client_to_edit.agent_id != login_session['agent_id']:
@@ -273,7 +293,7 @@ def clients(client_id=None):
                 client_to_edit.last_name = edit_last_name
                 client_to_edit.species_id = edit_species_id
                 client_to_edit.notes = edited_notes
-                client_to_edit.image = uploaded_image
+                client_to_edit.image = image_path
                 session.add(client_to_edit)
                 session.commit()
 
@@ -284,9 +304,9 @@ def clients(client_id=None):
                                        choose_species=species_drop_down, first_name=updated_client.first_name,
                                        last_name=updated_client.last_name, selected_species_id=updated_client.species_id,
                                        notes=updated_client.notes, client_id=updated_client.id,
-                                       client_image=default_image)
+                                       client_image=image_path)
 
-        # Non-post route that allows for loading a client to edit before post submission.
+        # Non-post route that allows for loading a client before post submission.
         # Also allows the form to render if a new client is created.
         # If there is a chosen client to work with proceed.
         elif client_id is not None:
@@ -297,11 +317,14 @@ def clients(client_id=None):
                     passenger = session.query(Passengers).filter_by(id=client_id).one()
                     species = session.query(Species).filter_by(id=passenger.species_id).one()
 
+                    if passenger.image is None:
+                        passenger.image=app.config['DEFAULT_IMAGE']
+
                     return render_template('master2.html', page=user_location, choose_client=client_drop_down,
                                            choose_species=species_drop_down, first_name=passenger.first_name,
                                            last_name=passenger.last_name, selected_species_id=species.id,
                                            selected_species_name=species.name, notes=passenger.notes,
-                                           client_id=client_id, client_image=default_image)
+                                           client_id=client_id, client_image=passenger.image)
 
                 # If there is an error loading client information
                 # Alert the user with a flash message and disable form elements.
@@ -310,14 +333,15 @@ def clients(client_id=None):
                     return render_template('master2.html', page=user_location, choose_client=client_drop_down,
                                            choose_species=species_drop_down, selected_species_id='empty',
                                            selected_species_name='Species..', trip_button='disabled',
-                                           edit_button='disabled', client_image=default_image)
+                                           edit_button='disabled', client_image=app.config['DEFAULT_IMAGE'])
 
         # No client appears to be chosen
         # Render the form disabled until an actionable choice has been made.
         else:
             return render_template('master2.html', page=user_location, choose_client=client_drop_down,
                                    choose_species=species_drop_down, trip_button='disabled',
-                                   edit_button='disabled', client_image=default_image, selected_species_id='1')
+                                   edit_button='disabled', client_image=app.config['DEFAULT_IMAGE'],
+                                   selected_species_id='1')
 
 
 # Route for client deletion.
@@ -331,7 +355,7 @@ def delete_client(client_id):
 
     # Check for user login. Redirect if username is missing.
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
 
     else:
@@ -367,19 +391,23 @@ def create_trip(client_id):
 
     # Check for user login. Redirect if username is missing.
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
 
+    # Check to see if a client has been chosen or that the data has made it properly to the new form.
     elif client_id is not None:
 
                 passenger = session.query(Passengers).filter_by(id=client_id).one()
                 name = "Name: " + str(passenger.first_name) + " " + str(passenger.last_name)
-                image = '../static/images/eyes.gif'
+                image = str(passenger.image)
 
                 flash("Booking travel for: {} {}".format(passenger.first_name, passenger.last_name))
                 return render_template('master2.html', page=user_location, name=name, client_image=image,
                                        client_id=client_id, notes=passenger.notes)
 
+    # If a client has not been chosen, a direct link has been followed, or the form data was
+    # somehow interrupted: display the page disabled and notify the user to chose a client from
+    # the clients page.
     else:
         flash("Choose a passenger from clients to continue")
         return render_template('master2.html', page=user_location, choice_where="disabled",
@@ -396,7 +424,7 @@ def results(client_id=None):
     user_location = 'results.html'
 
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
     else:
 
@@ -442,7 +470,7 @@ def agent_choose_test():
     # Verify that user is logged in. If not redirect.
     # Repeated for all locations requiring authorization.
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
 
     user_location = 'agent_choose_test.html'
@@ -478,7 +506,7 @@ def agent_testing(test_client_id):
     # Verify that user is logged in. If not redirect.
     # Repeated for all locations requiring authorization.
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
 
     # Page to render within master.
@@ -486,7 +514,7 @@ def agent_testing(test_client_id):
 
     # Check for user login. Redirect if username is missing.
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
 
     test_passenger = session.query(TestPassengers).filter_by(id=test_client_id).one()
@@ -508,7 +536,7 @@ def test_results(test_client_id=None):
     # Verify that user is logged in. If not redirect.
     # Repeated for all locations requiring authorization.
     if 'username' not in login_session:
-        print "User is not logged in. Redirecting to index."
+        print "WARNING: User is not logged in. Redirecting to index."
         return index()
 
     if test_client_id is None:
@@ -578,6 +606,7 @@ def test_results(test_client_id=None):
     return render_template('master2.html', page=user_location, message=results_message)
 
 
+# Begin JSON return routes/functions
 # Return all vacation destination in JSON format
 @app.route('/destinations/JSON')
 def destinations_info_json():
@@ -599,12 +628,71 @@ def menu_info_json():
     return jsonify(menu=[i.serialize for i in menu])
 
 
-# Begin Login related functions
+# Begin XML return routes/functions
+# Bug: Client will have to view source to see complete xml
+# If the header is set then the file will download automatically.
+# Bug: adds .html to the .xml extension
 
+# Function that takes a query object and converts it into simple xml layout
+def convert_xml(query):
+    conversion = '<?xml version="1.0" encoding="UTF-8"?>\n'
+
+    for item in query:
+        conversion += '<item>\n'
+        conversion += ' <id>' + str(item.id) + '</id>\n'
+        conversion += ' <name>' + str(item.name) + '</name>\n'
+        conversion += ' <description>' + str(item.description) + '</description>\n'
+        conversion += '</item>'
+
+    response = make_response(conversion)
+
+    return response
+
+
+# Return all vacation destination in XML format
+@app.route('/destinations/XML')
+def destination_info_xml():
+    destination = session.query(Destinations).all()
+    response = convert_xml(destination)
+
+    # Force the download. Currently off for debugging
+    # and not to annoy Code Reviewers.
+    # response.headers["Content-Disposition"] = "attachment; filename=destinations.xml"
+
+    return response
+
+
+# Return all vacation travel methods in XML format
+@app.route('/travel_method/XML')
+def travel_method_info_xml():
+    travel_method = session.query(TravelMethod).all()
+    response = convert_xml(travel_method)
+
+    # Force the download. Currently off for debugging
+    # and not to annoy Code Reviewers.
+    # response.headers["Content-Disposition"] = "attachment; filename=destinations.xml"
+
+    return response
+
+
+# Return all menu items available during travel in XML format
+@app.route('/menu/XML')
+def menu_info_xml():
+    menu = session.query(Menu).all()
+    response = convert_xml(menu)
+
+    # Force the download. Currently off for debugging
+    # and not to annoy Code Reviewers.
+    # response.headers["Content-Disposition"] = "attachment; filename=destinations.xml"
+
+    return response
+
+
+# Begin Login related functions
 # Agent Handling Functions
 def create_agent(login_session):
-    new_agent = Agents(name = login_session['username'], email=login_session['email'],
-                       picture=login_session['picture'])
+    new_agent = Agents(name=login_session['username'], email=login_session['email'],
+                       picture=login_session['image'])
     session.add(new_agent)
     agent = session.query(Agents).filter_by(email=login_session['email']).one()
     return agent.id
@@ -665,7 +753,7 @@ def gconnect():
     if result['issued_to'] != CLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
-        print "Token's client ID does not match app's."
+        print "WARNING: Token's client ID does not match app's."
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -681,22 +769,20 @@ def gconnect():
     login_session['gplus_id'] = gplus_id
 
     # Get user info
-    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    # old userinfo_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+    userinfo_url = url = 'https://www.googleapis.com/plus/v1/people/me'
     params = {'access_token': credentials.access_token, 'alt': 'json'}
     answer = requests.get(userinfo_url, params=params)
 
     data = answer.json()
 
-    login_session['username'] = data["name"]
-    print login_session['username']
-    login_session['picture'] = data["picture"]
-    print login_session['picture']
+    login_session['username'] = data['displayName']
     try:
-        login_session['email'] = data["email"]
-        print login_session['email']
+        login_session['email'] = data['emails'][0]['value']
     except:
         login_session['email'] = 'email@email.com'
         print "Warning: 'email' key not supplied, default email set"
+    login_session['image'] = data['image']['url']
 
     # For generic logout function
     login_session['provider'] = 'google'
@@ -743,11 +829,11 @@ def gdisconnect():
         try:
             del login_session['email']
         except:
-            print "No email key to delete"
-        del login_session['picture']
+            print "WARNING: No email key to delete"
+        del login_session['image']
 
-        # response = make_response(json.dumps('Successfully disconnected.'), 200)
-        # response.headers['Content-Type'] = 'application/json'
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
         return redirect(url_for('index'))
     else:
         # For whatever reason, the given token was invalid.
@@ -757,110 +843,6 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         # return response
         return redirect(url_for('index'))
-
-# Begin Image handling functions
-# For custom images for clients
-
-# Setup a directory for file uploads for custom image handling
-app.config['UPLOAD_FOLDER'] = '../static/uploads/'
-
-# key for accepted file types
-app.config['ALLOWED_EXTENSIONS'] = set(['jpg', 'jpeg', 'gif', 'png'])
-
-
-# check to see if file is accepted file type
-def check_file_type(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-
-
-# Function that attempts to process and uploaded client image
-def upload_client_image(image):
-
-    try:
-        image = request.files['image']
-        print image
-        if image and check_file_type(image.filename):
-            # provided extension not available to secure file name.
-            # Need to find an alternative
-            # filename = secure_filename(file.filename)
-
-            filename = bleach.clean(image.filename)
-            print filename
-
-            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            print "Message: Image upload successful"
-
-        return True
-
-    except:
-        print "Warning: Image upload failed"
-
-        return False
-
-
-""" Removed FB login in this version. """
-""" The API has since changed and does not return and email """
-""" Also have been unable to download client secret file referenced on line 527 """
-
-# @app.route('/fbconnect', methods=['POST'])
-# def fbconnect():
-#     if request.args.get('state') != login_session['state']:
-#         response = make_response(json.dumps('Invalid state parameter.'), 401)
-#         response.headers['Content-Type'] = 'application/json'
-#         return response
-#     access_token = request.data
-#
-#     # Exchange client token for long-lived server-side token with GET /oauth/
-#
-#     app_id = json.loads(open('fb_client_secrets.json', 'r').read())['web']['app_id']
-#     app_secret = json.loads(open('fb_client_secrets.json', 'r').read())['web']['app_secret']
-#     url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s' \
-#           'client_secret=%s&fb_exchange_token=%s' % (app_id,app_secret,access_token)
-#     h = httplib2.Http()
-#     result = h.request(url, 'GET')[1]
-#
-#     # Use token to get user info from API
-#     userinfo_url = "https://graph.facebook.com/v2.2/me"
-#     # strip expire tag from access token
-#     token = result.split("&")[0]
-#
-#     url = 'https://graph.facebook.com/v2.2/me?%s' % token
-#     h = httplib2.Http()
-#     result = h.request(url, 'GET')[1]
-#
-#     data = json.loads(result)
-#     login_session['provider'] = 'facebook'
-#     login_session['username'] = data['name']
-#     login_session['email'] = data['email']
-#     login_session['facebook_id'] = data['id']
-#
-#     # Get user picture
-#     url = 'https://graph.facebook.com/v2.2/me/picture?%s&redirect=0&height=200&width=200' % token
-#     h = httplib2.Http()
-#     result = h.request(url, 'GET')[1]
-#     data = json.loads(results)
-#
-#     login_session['picture'] = data['data']['url']
-#
-#     # See if user exists, if it doesn't make a new one
-#     agent_id = get_agent_id(login_session['email'])
-#     if not agent_id:
-#         agent_id = create_agent(login_session)
-#     login_session['agent_id'] = agent_id
-#
-# @app.route('/fbdisconnect')
-# def fbdisconnect():
-#
-#     facebook_id = login_session['facebook_id']
-#     url = 'https://graph.facebook.com/%s/permissions' % facebook_id
-#     h = httplib2.Http(url, 'DELETE')[1]
-#     del login_session['username']
-#     del login_session['email']
-#     del login_session['picture']
-#     del login_session['user_id']
-#     del login_session['facebook_id']
-#
-#     return redirect(url_for('index'))
 
 
 if __name__ == '__main__':

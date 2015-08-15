@@ -17,7 +17,7 @@
 <!-- client information and edit -->
 <div class="client_divider">
     <div class="client_info">
-        <form id="edit_client" action="{{ url_for('clients') }}" method="post">
+        <form id="edit_client" enctype="multipart/form-data" action="{{ url_for('clients') }}" method="post">
             <input type="hidden" id="client_id" name="client_id", value="{{ client_id }}">
             <input type="hidden" id="new_client" name="new_client" value="False">
             <input type="hidden" id="current_species" name="current_species" value="{{ current_species }}">
@@ -25,7 +25,7 @@
                 <span class="client_image">
                     <h3>
                         <img src="{{ client_image }}" height=100px width=100px alt="client image"><br>
-                        <input type="file" name="image" disabled>
+                        <input type="file" name="image" id="image" disabled>
                     </h3>
                 </span>
                 <h3>First Name: <input class="client_disabled" type="text" id="first_name" name="first_name" value="{{ first_name}}" disabled></h3>

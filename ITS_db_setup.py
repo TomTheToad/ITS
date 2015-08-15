@@ -19,6 +19,10 @@ class Agents(Base):
     email = Column(String(250), nullable=False)
     picture = Column(String(250))
 
+    # Added per request yet no mechanism exists for deleting agents
+    # Passengers can be deleted but no cascade is necessary
+    # Test agents are permanent and should not be deleted.
+
 
 # A collection of various species to choose from
 # when creating clients

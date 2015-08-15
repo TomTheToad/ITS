@@ -1,4 +1,4 @@
-InterStellar Travel Services Web Application version 0.2
+InterStellar Travel Services Web Application version 0.3
 An experimental application.
 
 Udacity Project 3
@@ -25,6 +25,12 @@ play the tests and see canned results.
 Requirements
 ______________________________________________________________________________________________________
 
+** Important **
+Requires 0.9 version of Flask.
+Requires 0.8.3 version of werkzeug
+
+The latest version of Flask will break the login and logout functions.
+
 A fully up to date web browser with javascript enabled.
 This is a student assignment and is not fully tested in all environments.
 
@@ -45,6 +51,14 @@ For JSON API calls you may enter the following urls:
     For methods of travel: localhost:5000/travel_method/JSON
 
     For menu items: localhost:5000/menu/JSON
+
+FOR XML API call you may enter the following urls(may require view page source):
+
+    For travel destinations: localhost:5000/destinations/XML
+
+    For methods of travel: localhost:5000/travel_method/XML
+
+    For menu items: localhost:5000/menu/XML
 
 
 
@@ -84,9 +98,25 @@ ITS
 
 
 
-Know bugs and possible upgrades
+Known bugs and possible upgrades
 ______________________________________________________________________________________________________
 
+A number of items have been fixed or added in this release.
+1) Updated google+ api url from https://www.googleapis.com/oauth2/v1/userinfo
+    to https://www.googleapis.com/plus/v1/people/me and updated requests.
+    The old url, and corresponding keys, did not allow for returned user email.
+
+2) Updated this document, per reviewer request. To reflect proper flask version.
+    I did attempt to update code to work with latest version of flask,
+    per reviewer suggestion, but the change to json broke other objects.
+    I'll have to spend more time to figure out what went wrong.
+
+3) Fixed the upload image function.
+
+4) Added XML response.
+
+
+First Submission for reference:
 This is a complicated app with allot of features.
 
 The biggest issues I have faced so far have been Google+ and Facebook authorization.
